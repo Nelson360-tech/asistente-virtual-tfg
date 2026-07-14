@@ -7,6 +7,13 @@ import webbrowser
 import datetime
 import wikipedia
 
+def hablar_chunks(texto, tamano=100):
+    """Divide el texto en fragmentos y los reproduce"""
+    for i in range(0, len(texto), tamano):
+        chunk = texto[i:i+tamano]
+        hablar(chunk)
+
+
 # Para visualizar las opciones de voz y el idioma
 """
 engine = pyttsx3.init()
@@ -164,17 +171,17 @@ def pedir_cosas():
             wikipedia.set_user_agent('AsistenteVirtualDonna/1.0')  # <-- agregar esto
             try:
                 resultado = wikipedia.summary(pedido, sentences=1)
-                hablar('Wikipedia dice lo siguiente:')
-                hablar(resultado)
+                hablar_chunks('Wikipedia dice lo siguiente:')
+                hablar_chunks(resultado)
             except Exception as e:
                 print(f'Error Wikipedia: {e}')
-                hablar('Lo siento, no pude encontrar información en Wikipedia')
+                hablar_chunks('Lo siento, no pude encontrar información en Wikipedia')
             continue
         elif 'busca en internet' in pedido:
             hablar('Ya mismo estoy en eso')
             pedido = pedido.replace('busca en internet', '')
             pywhatkit.search(pedido)
-            hablar('Esto es lo que he encontrado')
+            hablar_chunks('Esto es lo que he encontrado')
             continue
         elif 'reproducir' in pedido:
             hablar('Buena elección, ahora comienzo a reproducirlo')
