@@ -1,211 +1,60 @@
-import pyttsx3
-import speech_recognition as sr
-import pywhatkit
-import yfinance
-import pyjokes
-import webbrowser
 import datetime
-import wikipedia
 
-def hablar_chunks(texto, tamano=100):
-    """Divide el texto en fragmentos y los reproduce"""
-    for i in range(0, len(texto), tamano):
-        chunk = texto[i:i+tamano]
-        hablar(chunk)
+from audio_input import AudioInput
+from audio_output import AudioOutput
+from comandos import Comandos
 
 
-# Para visualizar las opciones de voz y el idioma
-"""
-engine = pyttsx3.init()
-for voz in engine.getProperty('voices'):
-    print(voz)
-"""
+class Asistente:
+    """Orquesta todo: escucha, interpreta el pedido y ejecuta el comando."""
 
-id1 = r'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_ES-ES_HELENA_11.0'
-id2 = r'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0'
-id3 = r'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_DAVID_11.0'
+    def __init__(self, nombre="Donna"):
+        self.nombre = nombre
+        self.audio_input = AudioInput()
+        self.audio_output = AudioOutput()
+        self.comandos = Comandos(self.audio_output)
 
-# Escuchar el microfono y devolver el audio como texto
-def transformar_audio_en_texto():
+    def saludo_inicial(self):
+        hora = datetime.datetime.now()
+        if hora.hour < 6 or hora.hour > 20:
+            momento = 'Buenas noches'
+        elif 6 <= hora.hour < 13:
+            momento = 'Buen día'
+        else:
+            momento = 'Buenas tardes'
+        self.audio_output.hablar(
+            f'{momento}, soy {self.nombre}, tu asistente personal. '
+            'Por favor, dime en que te puedo ayudar'
+        )
 
-    # Almacenar recognizer en variable
-    r = sr.Recognizer()
-
-    # Configurar el microfono
-    with sr.Microphone() as origen:
-
-        # tiempo de espera
-        r.pause_threshold = 0.8
-
-        # informar que comenzo la grabacion
-        print("Ya puedes hablar")
-
-        # Guardar lo que escuche como audio
-        audio = r.listen(origen)
-
-        try:
-            # Buscar en google
-            pedido = r.recognize_google(audio, language="es-AR")
-
-            # prueba de que pudo ingresar
-            print("Dijiste: " + pedido)
-
-            # devolver pedido
-            return pedido
-        # en caso de que no pueda comprender el audio
-        except sr.UnknownValueError:
-
-            # prueba de que no comprendio el audio
-            print("Uuppss, no entendi")
-
-            # devolver error
-            return "Sigo esperando"
-
-        # en caso de no resolver el pedido
-        except sr.RequestError:
-            # prueba de que no comprendio el audio
-            print("Uuppss, no hay servicio")
-
-            # devolver error
-            return "Sigo esperando"
-
-        # error inesperado
-        except Exception:
-            # prueba de que no comprendio el audio
-            print("Uuppss, algo ha salido mal")
-
-            # devolver error
-            return "Sigo esperando"
-
-# Funcion para que el asistente pueda ser escuchado
-def hablar(mensaje):
-    # encender el motor de pyttsx3
-    engine = pyttsx3.init()
-    engine.setProperty('voice', id1)
-
-    # pronunciar mensaje
-    engine.say(mensaje)
-    engine.runAndWait()
-
-# informar el dia de la semana
-def pedir_dia():
-
-    # crear variable con datos de hoy
-    dia = datetime.date.today()
-    print(dia)
-
-    # crear una variable para el dia de la semana
-    dia_semana = dia.weekday()
-    print(dia_semana)
-
-    # diccionario con nombres de dia
-    calendario = {0: 'Lunes',
-                  1: 'Martes',
-                  2: 'Miércoles',
-                  3: 'Jueves',
-                  4: 'Viernes',
-                  5: 'Sábado',
-                  6: 'Domingo'}
-
-    # decir el dia de la semana
-    hablar(f'Hoy es {calendario[dia_semana]}')
-
-# Informar que hora es
-def pedir_hora():
-
-    # Crear variables con datos de la hora
-    hora = datetime.datetime.now()
-    hora = f'En este momento son las {hora.hour} horas con {hora.minute} minutos y {hora.second} segundos'
-    print(hora)
-
-    # decir la hora
-    hablar(hora)
-
-# saludo inicial
-def saludo_inicial():
-
-    # crear variable con datos de hora
-    hora = datetime.datetime.now()
-    if hora.hour < 6 or hora.hour > 20:
-        momento = 'Buenas noches'
-    elif 6 <= hora.hour < 13:
-        momento = 'Buen día'
-    else:
-        momento = 'Buenas tardes'
-
-    # decir el saludo
-    hablar(f'{momento}, soy Donna, tu asistente personal. Por favor, dime en que te puedo ayudar')
-
-# funcion central del asistente
-def pedir_cosas():
-    #activar saludo inicial
-    saludo_inicial()
-
-    # variable de corte
-    comenzar = True
-
-    # loop central
-    while comenzar:
-
-        # activar el micro y guardar el pedido en un string
-        pedido = transformar_audio_en_texto().lower()
-
+    def procesar_pedido(self, pedido):
+        """Interpreta el pedido y devuelve False si hay que cortar el loop."""
         if 'abrir youtube' in pedido:
-            hablar('Con gusto, estoy abriendo youTube')
-            webbrowser.open('https://www.youtube.com')
-            continue
+            self.comandos.abrir_youtube()
         elif 'abrir el navegador' in pedido:
-            hablar('Claro, estoy en eso')
-            webbrowser.open('https://www.google.com')
-            continue
+            self.comandos.abrir_navegador()
         elif 'qué día es hoy' in pedido:
-            pedir_dia()
-            continue
+            self.comandos.decir_dia()
         elif 'qué hora es' in pedido:
-            pedir_hora()
-            continue
+            self.comandos.decir_hora()
         elif 'busca en wikipedia' in pedido:
-            hablar('Buscando eso en wikipedia')
-            pedido = pedido.replace('busca en wikipedia', '')
-            wikipedia.set_lang('es')
-            wikipedia.set_user_agent('AsistenteVirtualDonna/1.0')  # <-- agregar esto
-            try:
-                resultado = wikipedia.summary(pedido, sentences=1)
-                hablar_chunks('Wikipedia dice lo siguiente:')
-                hablar_chunks(resultado)
-            except Exception as e:
-                print(f'Error Wikipedia: {e}')
-                hablar_chunks('Lo siento, no pude encontrar información en Wikipedia')
-            continue
+            self.comandos.buscar_wikipedia(pedido)
         elif 'busca en internet' in pedido:
-            hablar('Ya mismo estoy en eso')
-            pedido = pedido.replace('busca en internet', '')
-            pywhatkit.search(pedido)
-            hablar_chunks('Esto es lo que he encontrado')
-            continue
+            self.comandos.buscar_internet(pedido)
         elif 'reproducir' in pedido:
-            hablar('Buena elección, ahora comienzo a reproducirlo')
-            pywhatkit.playonyt(pedido)
-            continue
+            self.comandos.reproducir(pedido)
         elif 'broma' in pedido:
-            hablar(pyjokes.get_joke('es'))
-            continue
+            self.comandos.contar_broma()
         elif 'precio de las acciones' in pedido:
-            accion = pedido.split('de')[-1].strip()
-            cartera = {'apple':'AAPL',
-                       'amazon':'AMZN',
-                       'google':'GOOGL'}
-            try:
-                accion_buscada = cartera[accion]
-                accion_buscada = yfinance.Ticker(accion_buscada)
-                precio_actual = accion_buscada.info['regularMarketPrice']
-                hablar(f'La encontré, el precio de {accion} es {precio_actual}')
-                continue
-            except:
-                hablar('Perdón, pero no la he encontrado')
-                continue
+            self.comandos.precio_acciones(pedido)
         elif 'adiós' in pedido:
-            hablar('Perfecto, me voy a descansar, cualquier cosa me avisas')
-            break
+            self.comandos.despedirse()
+            return False
+        return True
 
-pedir_cosas()
+    def ejecutar(self):
+        self.saludo_inicial()
+        continuar = True
+        while continuar:
+            pedido = self.audio_input.escuchar().lower()
+            continuar = self.procesar_pedido(pedido)
