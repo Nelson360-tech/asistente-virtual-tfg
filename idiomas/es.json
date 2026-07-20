@@ -1,0 +1,54 @@
+{
+  "escucha": {
+    "puedes_hablar": "Ya puedes hablar",
+    "dijiste": "Dijiste: {pedido}",
+    "no_entiendo": "Uuppss, no entendí",
+    "sin_servicio": "Uuppss, no hay servicio",
+    "error_general": "Uuppss, algo ha salido mal",
+    "esperando": "Sigo esperando"
+  },
+  "saludo": {
+    "manana": "Buen día",
+    "tarde": "Buenas tardes",
+    "noche": "Buenas noches",
+    "presentacion": "{momento}, soy Donna, tu asistente personal. Por favor, dime en qué te puedo ayudar"
+  },
+  "respuestas": {
+    "abrir_youtube": "Con gusto, estoy abriendo YouTube",
+    "abrir_navegador": "Claro, estoy en eso",
+    "dia": "Hoy es {dia}",
+    "hora": "En este momento son las {hora} horas con {minuto} minutos y {segundo} segundos",
+    "buscando_wikipedia": "Buscando eso en Wikipedia",
+    "wikipedia_dice": "Wikipedia dice lo siguiente:",
+    "error_wikipedia": "Lo siento, no pude encontrar información en Wikipedia",
+    "buscando_internet": "Ya mismo estoy en eso",
+    "resultado_internet": "Esto es lo que he encontrado",
+    "reproducir": "Buena elección, ahora comienzo a reproducirlo",
+    "precio_accion": "La encontré, el precio de {accion} es {precio}",
+    "accion_no_encontrada": "Perdón, pero no la he encontrado",
+    "despedida": "Perfecto, me voy a descansar, cualquier cosa me avisas",
+    "ayuda_titulo": "Estos son los comandos disponibles:"
+  },
+  "comandos": [
+    "abrir YouTube",
+    "abrir el navegador",
+    "qué día es hoy",
+    "qué hora es",
+    "busca en Wikipedia",
+    "busca en internet",
+    "reproducir",
+    "broma",
+    "precio de las acciones",
+    "ayuda",
+    "adiós"
+  ],
+  "dias_semana": [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+    "Domingo"
+  ]
+}

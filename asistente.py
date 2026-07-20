@@ -1,204 +1,202 @@
-import pyttsx3
-import speech_recognition as sr
-import pywhatkit
-import yfinance
-import pyjokes
-import webbrowser
 import datetime
+import json
+import platform
+import webbrowser
+from pathlib import Path
+
+import pyjokes
+import pyttsx3
+import pywhatkit
+import speech_recognition as sr
 import wikipedia
+import yfinance
 
-# Para visualizar las opciones de voz y el idioma
-"""
-engine = pyttsx3.init()
-for voz in engine.getProperty('voices'):
-    print(voz)
-"""
 
-id1 = r'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_ES-ES_HELENA_11.0'
-id2 = r'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0'
-id3 = r'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_DAVID_11.0'
+def cargar_textos(idioma="es"):
+    ruta = Path(__file__).parent / "idiomas" / f"{idioma}.json"
 
-# Escuchar el microfono y devolver el audio como texto
+    with ruta.open("r", encoding="utf-8") as archivo:
+        return json.load(archivo)
+
+
+TEXTOS = cargar_textos()
+
+VOZ_WINDOWS = (
+    r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices"
+    r"\Tokens\TTS_MS_ES-ES_HELENA_11.0"
+)
+
+
 def transformar_audio_en_texto():
+    reconocedor = sr.Recognizer()
 
-    # Almacenar recognizer en variable
-    r = sr.Recognizer()
-
-    # Configurar el microfono
     with sr.Microphone() as origen:
+        reconocedor.pause_threshold = 0.8
+        print(TEXTOS["escucha"]["puedes_hablar"])
+        audio = reconocedor.listen(origen)
 
-        # tiempo de espera
-        r.pause_threshold = 0.8
+    try:
+        pedido = reconocedor.recognize_google(audio, language="es-AR")
+        print(
+            TEXTOS["escucha"]["dijiste"].format(pedido=pedido)
+        )
+        return pedido
 
-        # informar que comenzo la grabacion
-        print("Ya puedes hablar")
+    except sr.UnknownValueError:
+        print(TEXTOS["escucha"]["no_entiendo"])
 
-        # Guardar lo que escuche como audio
-        audio = r.listen(origen)
+    except sr.RequestError:
+        print(TEXTOS["escucha"]["sin_servicio"])
 
-        try:
-            # Buscar en google
-            pedido = r.recognize_google(audio, language="es-AR")
+    except Exception as error:
+        print(TEXTOS["escucha"]["error_general"])
+        print(f"Detalle técnico: {error}")
 
-            # prueba de que pudo ingresar
-            print("Dijiste: " + pedido)
+    return TEXTOS["escucha"]["esperando"]
 
-            # devolver pedido
-            return pedido
-        # en caso de que no pueda comprender el audio
-        except sr.UnknownValueError:
 
-            # prueba de que no comprendio el audio
-            print("Uuppss, no entendi")
-
-            # devolver error
-            return "Sigo esperando"
-
-        # en caso de no resolver el pedido
-        except sr.RequestError:
-            # prueba de que no comprendio el audio
-            print("Uuppss, no hay servicio")
-
-            # devolver error
-            return "Sigo esperando"
-
-        # error inesperado
-        except Exception:
-            # prueba de que no comprendio el audio
-            print("Uuppss, algo ha salido mal")
-
-            # devolver error
-            return "Sigo esperando"
-
-# Funcion para que el asistente pueda ser escuchado
 def hablar(mensaje):
-    # encender el motor de pyttsx3
-    engine = pyttsx3.init()
-    engine.setProperty('voice', id1)
+    motor = pyttsx3.init()
 
-    # pronunciar mensaje
-    engine.say(mensaje)
-    engine.runAndWait()
+    if platform.system() == "Windows":
+        motor.setProperty("voice", VOZ_WINDOWS)
 
-# informar el dia de la semana
+    motor.say(mensaje)
+    motor.runAndWait()
+
+
+def mostrar_ayuda():
+    print(TEXTOS["respuestas"]["ayuda_titulo"])
+
+    for comando in TEXTOS["comandos"]:
+        print(f"- {comando}")
+
+
 def pedir_dia():
+    hoy = datetime.date.today()
+    nombre_dia = TEXTOS["dias_semana"][hoy.weekday()]
+    mensaje = TEXTOS["respuestas"]["dia"].format(dia=nombre_dia)
 
-    # crear variable con datos de hoy
-    dia = datetime.date.today()
-    print(dia)
+    print(mensaje)
+    hablar(mensaje)
 
-    # crear una variable para el dia de la semana
-    dia_semana = dia.weekday()
-    print(dia_semana)
 
-    # diccionario con nombres de dia
-    calendario = {0: 'Lunes',
-                  1: 'Martes',
-                  2: 'Miércoles',
-                  3: 'Jueves',
-                  4: 'Viernes',
-                  5: 'Sábado',
-                  6: 'Domingo'}
-
-    # decir el dia de la semana
-    hablar(f'Hoy es {calendario[dia_semana]}')
-
-# Informar que hora es
 def pedir_hora():
+    ahora = datetime.datetime.now()
+    mensaje = TEXTOS["respuestas"]["hora"].format(
+        hora=ahora.hour,
+        minuto=ahora.minute,
+        segundo=ahora.second,
+    )
 
-    # Crear variables con datos de la hora
-    hora = datetime.datetime.now()
-    hora = f'En este momento son las {hora.hour} horas con {hora.minute} minutos y {hora.second} segundos'
-    print(hora)
+    print(mensaje)
+    hablar(mensaje)
 
-    # decir la hora
-    hablar(hora)
 
-# saludo inicial
 def saludo_inicial():
+    hora = datetime.datetime.now().hour
 
-    # crear variable con datos de hora
-    hora = datetime.datetime.now()
-    if hora.hour < 6 or hora.hour > 20:
-        momento = 'Buenas noches'
-    elif 6 <= hora.hour < 13:
-        momento = 'Buen día'
+    if hora < 6 or hora > 20:
+        momento = TEXTOS["saludo"]["noche"]
+    elif hora < 13:
+        momento = TEXTOS["saludo"]["manana"]
     else:
-        momento = 'Buenas tardes'
+        momento = TEXTOS["saludo"]["tarde"]
 
-    # decir el saludo
-    hablar(f'{momento}, soy Donna, tu asistente personal. Por favor, dime en que te puedo ayudar')
+    mensaje = TEXTOS["saludo"]["presentacion"].format(
+        momento=momento
+    )
+    hablar(mensaje)
 
-# funcion central del asistente
+
+def buscar_wikipedia(pedido):
+    hablar(TEXTOS["respuestas"]["buscando_wikipedia"])
+    consulta = pedido.replace("busca en wikipedia", "").strip()
+
+    wikipedia.set_lang("es")
+    wikipedia.set_user_agent("AsistenteVirtualDonna/1.0")
+
+    try:
+        resultado = wikipedia.summary(consulta, sentences=1)
+        hablar(TEXTOS["respuestas"]["wikipedia_dice"])
+        hablar(resultado)
+
+    except Exception as error:
+        print(f"Error Wikipedia: {error}")
+        hablar(TEXTOS["respuestas"]["error_wikipedia"])
+
+
+def consultar_accion(pedido):
+    accion = pedido.split("de")[-1].strip()
+    cartera = {
+        "apple": "AAPL",
+        "amazon": "AMZN",
+        "google": "GOOGL",
+    }
+
+    try:
+        simbolo = cartera[accion]
+        datos = yfinance.Ticker(simbolo)
+        precio = datos.info["regularMarketPrice"]
+        mensaje = TEXTOS["respuestas"]["precio_accion"].format(
+            accion=accion,
+            precio=precio,
+        )
+        hablar(mensaje)
+
+    except Exception:
+        hablar(TEXTOS["respuestas"]["accion_no_encontrada"])
+
+
 def pedir_cosas():
-    #activar saludo inicial
     saludo_inicial()
+    continuar = True
 
-    # variable de corte
-    comenzar = True
-
-    # loop central
-    while comenzar:
-
-        # activar el micro y guardar el pedido en un string
+    while continuar:
         pedido = transformar_audio_en_texto().lower()
 
-        if 'abrir youtube' in pedido:
-            hablar('Con gusto, estoy abriendo youTube')
-            webbrowser.open('https://www.youtube.com')
-            continue
-        elif 'abrir el navegador' in pedido:
-            hablar('Claro, estoy en eso')
-            webbrowser.open('https://www.google.com')
-            continue
-        elif 'qué día es hoy' in pedido:
-            pedir_dia()
-            continue
-        elif 'qué hora es' in pedido:
-            pedir_hora()
-            continue
-        elif 'busca en wikipedia' in pedido:
-            hablar('Buscando eso en wikipedia')
-            pedido = pedido.replace('busca en wikipedia', '')
-            wikipedia.set_lang('es')
-            wikipedia.set_user_agent('AsistenteVirtualDonna/1.0')  # <-- agregar esto
-            try:
-                resultado = wikipedia.summary(pedido, sentences=1)
-                hablar('Wikipedia dice lo siguiente:')
-                hablar(resultado)
-            except Exception as e:
-                print(f'Error Wikipedia: {e}')
-                hablar('Lo siento, no pude encontrar información en Wikipedia')
-            continue
-        elif 'busca en internet' in pedido:
-            hablar('Ya mismo estoy en eso')
-            pedido = pedido.replace('busca en internet', '')
-            pywhatkit.search(pedido)
-            hablar('Esto es lo que he encontrado')
-            continue
-        elif 'reproducir' in pedido:
-            hablar('Buena elección, ahora comienzo a reproducirlo')
-            pywhatkit.playonyt(pedido)
-            continue
-        elif 'broma' in pedido:
-            hablar(pyjokes.get_joke('es'))
-            continue
-        elif 'precio de las acciones' in pedido:
-            accion = pedido.split('de')[-1].strip()
-            cartera = {'apple':'AAPL',
-                       'amazon':'AMZN',
-                       'google':'GOOGL'}
-            try:
-                accion_buscada = cartera[accion]
-                accion_buscada = yfinance.Ticker(accion_buscada)
-                precio_actual = accion_buscada.info['regularMarketPrice']
-                hablar(f'La encontré, el precio de {accion} es {precio_actual}')
-                continue
-            except:
-                hablar('Perdón, pero no la he encontrado')
-                continue
-        elif 'adiós' in pedido:
-            hablar('Perfecto, me voy a descansar, cualquier cosa me avisas')
-            break
+        if "abrir youtube" in pedido:
+            hablar(TEXTOS["respuestas"]["abrir_youtube"])
+            webbrowser.open("https://www.youtube.com")
 
-pedir_cosas()
+        elif "abrir el navegador" in pedido:
+            hablar(TEXTOS["respuestas"]["abrir_navegador"])
+            webbrowser.open("https://www.google.com")
+
+        elif "qué día es hoy" in pedido:
+            pedir_dia()
+
+        elif "qué hora es" in pedido:
+            pedir_hora()
+
+        elif "busca en wikipedia" in pedido:
+            buscar_wikipedia(pedido)
+
+        elif "busca en internet" in pedido:
+            hablar(TEXTOS["respuestas"]["buscando_internet"])
+            consulta = pedido.replace(
+                "busca en internet", ""
+            ).strip()
+            pywhatkit.search(consulta)
+            hablar(TEXTOS["respuestas"]["resultado_internet"])
+
+        elif "reproducir" in pedido:
+            hablar(TEXTOS["respuestas"]["reproducir"])
+            pywhatkit.playonyt(pedido)
+
+        elif "broma" in pedido:
+            hablar(pyjokes.get_joke("es"))
+
+        elif "precio de las acciones" in pedido:
+            consultar_accion(pedido)
+
+        elif "ayuda" in pedido:
+            mostrar_ayuda()
+
+        elif "adiós" in pedido:
+            hablar(TEXTOS["respuestas"]["despedida"])
+            continuar = False
+
+
+if __name__ == "__main__":
+    pedir_cosas()
