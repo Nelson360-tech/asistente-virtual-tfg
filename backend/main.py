@@ -1,6 +1,9 @@
 from fastapi import FastAPI, UploadFile
 
+from donna.speech_to_text import SpeechToText
+
 app = FastAPI(title="Donna API")
+stt = SpeechToText()
 
 
 @app.get("/health")
@@ -9,10 +12,6 @@ def health():
 
 
 @app.post("/api/ask")
-async def ask(audio: UploadFile):
-    content = await audio.read()
-    return {
-        "filename": audio.filename,
-        "content_type": audio.content_type,
-        "size_bytes": len(content),
-    }
+def ask(audio: UploadFile):
+    question = stt.transcribe(audio.file)
+    return {"question": question}
