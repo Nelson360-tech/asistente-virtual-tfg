@@ -14,7 +14,7 @@ node "Ordenador del usuario\n<<device>>\nWindows 11 / macOS / Linux" as PC {
     artifact "Modelo Whisper base\n(caché de modelos)" as WM
     artifact "es_AR-daniela-high.onnx\n(voices/)" as VOICE
     folder "audio/\n(respuestas .wav)" as AUD
-    database "donna.db\n<<planificado>>" as DB
+    database "donna.db\n(SQLite)" as DB
   }
 }
 

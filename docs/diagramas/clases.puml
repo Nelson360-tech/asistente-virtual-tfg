@@ -10,9 +10,11 @@ package "backend" {
     + commands : Commands
     + tts : TextToSpeech
     + lip_sync : LipSync
+    + history : History
     --
     + health() : dict
     + ask(audio : UploadFile) : dict
+    + get_history(limit : int = 20) : list[dict]
   }
 }
 
@@ -35,6 +37,14 @@ package "donna" {
     + __init__(voice_path : Path, output_dir : Path)
     + synthesize(text : str) : tuple[str, list[PhonemeAlignment]]
   }
+  class History {
+    - db_path : Path
+    --
+    + __init__(db_path : Path)
+    + add(question, answer, audio_file, t_stt_ms, t_tts_ms, t_total_ms, ...)
+    + latest(limit : int = 20) : list[dict]
+    - _execute(sql : str, params) : list
+  }
   class LipSync {
     - fps : int = 30
     --
@@ -49,6 +59,7 @@ package "bibliotecas externas" <<Frame>> {
     + phoneme : str
     + num_samples : int
   }
+  class "sqlite3" as SQL <<module>>
   class "openfacefx" as OFX <<module>> {
     + parse_piper_alignments()
     + generate_from_alignment()
@@ -60,10 +71,12 @@ main *-- "1" SpeechToText
 main *-- "1" Commands
 main *-- "1" TextToSpeech
 main *-- "1" LipSync
+main *-- "1" History
 
 SpeechToText *-- "1" WhisperModel
 TextToSpeech *-- "1" PiperVoice
 TextToSpeech ..> PhonemeAlignment : <<create>>
 LipSync ..> PhonemeAlignment : <<use>>
 LipSync ..> OFX : <<use>>
+History ..> SQL : <<use>>
 @enduml
