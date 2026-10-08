@@ -1,0 +1,17 @@
+skinparam dpi 220
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundCorner 6
+skinparam ArrowColor #333333
+skinparam componentStyle uml2
+skinparam ComponentBackgroundColor #EEF4FB
+skinparam ComponentBorderColor #2F5F8F
+skinparam NodeBackgroundColor #F7F7F7
+skinparam NodeBorderColor #555555
+skinparam ArtifactBackgroundColor #FFFFFF
+skinparam ClassBackgroundColor #EEF4FB
+skinparam ClassBorderColor #2F5F8F
+skinparam ClassHeaderBackgroundColor #D6E6F5
+skinparam NoteBackgroundColor #FFF8DC
+skinparam NoteBorderColor #B8A040

@@ -1,0 +1,39 @@
+@startuml
+!include comun.iuml
+title Diagrama de despliegue de Donna (prototipo)
+
+node "Ordenador del usuario\n<<device>>\nWindows 11 / macOS / Linux" as PC {
+  node "Navegador web\n<<executionEnvironment>>\nChrome / Firefox / Edge" as NAV {
+    artifact "Frontend\n(HTML, CSS, JavaScript)" as FE
+    artifact "three.module.js" as THREE
+    artifact "facecap.glb\n(modelo del avatar)" as GLB
+  }
+  node "Python 3.13 + Uvicorn\n<<executionEnvironment>>" as PY {
+    artifact "main.py\n(aplicación FastAPI)" as MAIN
+    artifact "paquete donna/" as PKG
+    artifact "Modelo Whisper base\n(caché de modelos)" as WM
+    artifact "es_AR-daniela-high.onnx\n(voices/)" as VOICE
+    folder "audio/\n(respuestas .wav)" as AUD
+    database "donna.db\n<<planificado>>" as DB
+  }
+}
+
+node "Micrófono\n<<device>>" as MICD
+node "Altavoces\n<<device>>" as SPK
+
+cloud "Internet\n<<planificado>>" as NET {
+  node "Wikipedia API" as WIKI
+  node "Yahoo Finance" as YF
+}
+
+MICD -- NAV : audio
+NAV -- SPK : audio
+NAV -- PY : HTTP\nlocalhost:8000
+PY -- NET : HTTPS\n(solo texto)
+
+note bottom of PC
+  En el prototipo, cliente y servidor se ejecutan en el mismo equipo.
+  La comunicación es HTTP, por lo que pueden separarse en dos máquinas
+  sin cambiar el código (añadiendo HTTPS y restringiendo CORS).
+end note
+@enduml

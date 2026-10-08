@@ -1,0 +1,69 @@
+@startuml
+!include comun.iuml
+title Diagrama de clases del backend de Donna
+hide empty members
+
+package "backend" {
+  class main <<module>> {
+    + app : FastAPI
+    + stt : SpeechToText
+    + commands : Commands
+    + tts : TextToSpeech
+    + lip_sync : LipSync
+    --
+    + health() : dict
+    + ask(audio : UploadFile) : dict
+  }
+}
+
+package "donna" {
+  class SpeechToText {
+    - model : WhisperModel
+    --
+    + __init__(model_size : str = "base")
+    + transcribe(audio_file, language : str = "es") : str
+  }
+  class Commands {
+    + execute(question : str) : dict
+    - _reply(answer : str, action : dict = None) : dict
+  }
+  class TextToSpeech {
+    - voice : PiperVoice
+    + sample_rate : int
+    - output_dir : Path
+    --
+    + __init__(voice_path : Path, output_dir : Path)
+    + synthesize(text : str) : tuple[str, list[PhonemeAlignment]]
+  }
+  class LipSync {
+    - fps : int = 30
+    --
+    + visemes(alignments : list[PhonemeAlignment], sample_rate : int) : list[dict]
+  }
+}
+
+package "bibliotecas externas" <<Frame>> {
+  class WhisperModel <<faster_whisper>>
+  class PiperVoice <<piper>>
+  class PhonemeAlignment <<piper>> {
+    + phoneme : str
+    + num_samples : int
+  }
+  class "openfacefx" as OFX <<module>> {
+    + parse_piper_alignments()
+    + generate_from_alignment()
+    + dominant_cues()
+  }
+}
+
+main *-- "1" SpeechToText
+main *-- "1" Commands
+main *-- "1" TextToSpeech
+main *-- "1" LipSync
+
+SpeechToText *-- "1" WhisperModel
+TextToSpeech *-- "1" PiperVoice
+TextToSpeech ..> PhonemeAlignment : <<create>>
+LipSync ..> PhonemeAlignment : <<use>>
+LipSync ..> OFX : <<use>>
+@enduml
