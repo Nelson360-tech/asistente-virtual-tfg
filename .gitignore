@@ -6,3 +6,4 @@ __pycache__/
 .idea/
 voices/
 audio/
+donna.db
