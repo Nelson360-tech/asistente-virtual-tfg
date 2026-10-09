@@ -1,0 +1,39 @@
+# Dependencias
+node_modules
+
+# Salidas de Nuxt / Nitro
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Variables de entorno (se conserva solo la plantilla)
+.env
+.env.*
+!.env.example
+
+# Secretos y credenciales
+*.pem
+*.key
+*.p12
+*.crt
+
+# Informes generados
+audit-report.json
+coverage
+
+# Logs y temporales
+logs
+*.log
+*.tmp
+*.swp
+*.backup
+*.bak
+*~
+
+# Sistema y editores
+.DS_Store
+.idea
+.fleet
