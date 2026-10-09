@@ -4,10 +4,10 @@ title Diagrama de componentes de Donna
 skinparam nodesep 40
 skinparam ranksep 55
 
-package "Cliente web (navegador)" {
-  [Captura de audio\n(MediaRecorder API)] as MIC
-  [Interfaz de usuario] as UI <<en desarrollo>>
-  [Avatar 3D\n(Three.js)] as AV <<en desarrollo>>
+package "Cliente web (Nuxt 4 + Vue 3)" {
+  [Captura de audio\n(useVoiceRecorder,\nMediaRecorder API)] as MIC
+  [Interfaz de usuario\n(app.vue)] as UI
+  [Avatar 3D\n(DonnaAvatar, Three.js)] as AV
 }
 
 package "Backend (FastAPI + Uvicorn)" {

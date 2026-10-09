@@ -4,9 +4,12 @@ title Diagrama de despliegue de Donna (prototipo)
 
 node "Ordenador del usuario\n<<device>>\nWindows 11 / macOS / Linux" as PC {
   node "Navegador web\n<<executionEnvironment>>\nChrome / Firefox / Edge" as NAV {
-    artifact "Frontend\n(HTML, CSS, JavaScript)" as FE
+    artifact "Aplicación web\n(Vue 3, TypeScript)" as FE
     artifact "three.module.js" as THREE
     artifact "facecap.glb\n(modelo del avatar)" as GLB
+  }
+  node "Node.js 24 + Nuxt 4\n<<executionEnvironment>>" as NODE {
+    artifact "frontend/\n(proyecto Nuxt)" as NX
   }
   node "Python 3.13 + Uvicorn\n<<executionEnvironment>>" as PY {
     artifact "main.py\n(aplicación FastAPI)" as MAIN
@@ -29,6 +32,7 @@ cloud "Internet\n<<planificado>>" as NET {
 MICD -- NAV : audio
 NAV -- SPK : audio
 NAV -- PY : HTTP\nlocalhost:8000
+NODE -- NAV : HTTP\nlocalhost:3000
 PY -- NET : HTTPS\n(solo texto)
 
 note bottom of PC
