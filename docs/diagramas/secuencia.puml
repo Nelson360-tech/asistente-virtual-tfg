@@ -1,0 +1,34 @@
+@startuml
+!include comun.iuml
+title Diagrama de secuencia de una petición a Donna
+skinparam ParticipantBackgroundColor #EEF4FB
+skinparam ParticipantBorderColor #2F5F8F
+skinparam SequenceLifeLineBorderColor #888888
+autonumber
+actor Usuario
+participant "Cliente web" as UI
+participant "API REST\n(main.py)" as API
+participant SpeechToText as STT
+participant Commands as CMD
+participant TextToSpeech as TTS
+participant LipSync as LS
+participant History as H
+
+Usuario -> UI : habla al micrófono
+UI -> API : POST /api/ask (audio)
+activate API
+API -> STT : transcribe(audio)
+STT --> API : pregunta (texto)
+API -> CMD : execute(pregunta)
+CMD --> API : respuesta y acción
+API -> TTS : synthesize(respuesta)
+TTS --> API : archivo .wav y fonemas con duración
+API -> LS : visemes(fonemas, sample_rate)
+LS --> API : visemas con marca temporal
+API -> H : add(pregunta, respuesta, tiempos)
+API --> UI : JSON (pregunta, respuesta, audio_url, visemas, acción)
+deactivate API
+UI -> API : GET /audio/{archivo}
+API --> UI : audio de la respuesta
+UI -> Usuario : reproduce el audio y anima\nla boca del avatar con los visemas
+@enduml

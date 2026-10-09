@@ -1,0 +1,57 @@
+@startuml
+!include comun.iuml
+title Diagrama de componentes de Donna
+skinparam nodesep 40
+skinparam ranksep 55
+
+package "Cliente web (navegador)" {
+  [Captura de audio\n(MediaRecorder API)] as MIC
+  [Interfaz de usuario] as UI <<en desarrollo>>
+  [Avatar 3D\n(Three.js)] as AV <<en desarrollo>>
+}
+
+package "Backend (FastAPI + Uvicorn)" {
+  () "POST /api/ask" as IASK
+  () "GET /audio/{archivo}" as IAUDIO
+  () "GET /api/history" as IHIST
+  [API REST\n(main.py)] as API
+  [SpeechToText] as STT
+  [Commands] as CMD
+  [TextToSpeech] as TTS
+  [LipSync] as LS
+  [History\n(historial)] as HIST
+}
+
+package "Bibliotecas locales" {
+  [faster-whisper\n(Whisper base)] as FW
+  [Piper\n(es_AR-daniela-high)] as PIPER
+  [OpenFaceFX] as OFX
+  database "SQLite\n(donna.db)" as DB
+}
+
+cloud "Servicios externos" {
+  [Wikipedia API] as WIKI <<planificado>>
+  [Yahoo Finance] as YF <<planificado>>
+}
+
+MIC -right-> UI : grabación
+UI -right-> AV : visemas
+UI ..> IASK : <<use>>\npregunta
+UI ..> IAUDIO : <<use>>\nrespuesta
+IASK -down- API
+IAUDIO -down- API
+IHIST -down- API
+
+API --> STT : transcribe()
+API --> CMD : execute()
+API --> TTS : synthesize()
+API --> LS : visemes()
+API --> HIST : add()
+
+STT ..> FW
+TTS ..> PIPER
+LS ..> OFX
+HIST --> DB
+CMD ..> WIKI
+CMD ..> YF
+@enduml

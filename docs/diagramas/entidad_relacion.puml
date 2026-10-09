@@ -1,0 +1,63 @@
+@startuml
+!include comun.iuml
+title Modelo Entidad-Relación de Donna
+hide circle
+skinparam linetype ortho
+skinparam EntityBackgroundColor #EEF4FB
+skinparam EntityBorderColor #2F5F8F
+
+entity "COMANDO" as COMANDO {
+  * id : INTEGER <<PK>>
+  --
+  * nombre : TEXT <<UNIQUE>>
+  descripcion : TEXT
+  * requiere_internet : BOOLEAN
+  * activo : BOOLEAN
+}
+
+entity "FRASE_ACTIVACION" as FRASE {
+  * id : INTEGER <<PK>>
+  --
+  * comando_id : INTEGER <<FK>>
+  * idioma : TEXT  (es | en)
+  * texto : TEXT
+}
+
+entity "INTERACCION" as INTER {
+  * id : INTEGER <<PK>>
+  --
+  * fecha_hora : TIMESTAMP
+  * idioma : TEXT
+  * pregunta : TEXT
+  * respuesta : TEXT
+  comando_id : INTEGER <<FK>>
+  archivo_audio : TEXT
+  duracion_audio_s : REAL
+  t_transcripcion_ms : INTEGER
+  t_sintesis_ms : INTEGER
+  * t_total_ms : INTEGER
+  * estado : TEXT  (ok | error)
+  mensaje_error : TEXT
+}
+
+entity "CONFIGURACION" as CONF {
+  * clave : TEXT <<PK>>
+  --
+  * valor : TEXT
+}
+
+COMANDO ||--|{ FRASE : "se activa con"
+COMANDO |o--o{ INTER : "resuelve"
+
+note right of INTER
+  comando_id es NULL cuando
+  ningún comando coincide.
+  No se guarda el audio de la pregunta
+  ni los visemas (se regeneran).
+end note
+
+note right of CONF
+  Ejemplos: idioma_por_defecto,
+  voz, dias_conservacion_historial
+end note
+@enduml
