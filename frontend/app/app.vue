@@ -300,14 +300,18 @@ useHead({
             :data-listening="isRecording"
             :data-processing="processing"
           >
-            <div class="voice-symbol">
-              <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"
-                   stroke="currentColor" stroke-width="2.8"
-                   stroke-linecap="round">
-                <path d="M8 20v8M14 14v20M20 9v30M26 17v14M32 11v26M38 20v8"/>
-              </svg>
-            </div>
-            <p class="avatar-caption">Espacio para el avatar de Donna</p>
+            <ClientOnly>
+              <DonnaAvatar />
+              <template #fallback>
+                <div class="voice-symbol">
+                  <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"
+                       stroke="currentColor" stroke-width="2.8"
+                       stroke-linecap="round">
+                    <path d="M8 20v8M14 14v20M20 9v30M26 17v14M32 11v26M38 20v8"/>
+                  </svg>
+                </div>
+              </template>
+            </ClientOnly>
           </div>
 
           <div class="voice-bottom">
@@ -590,6 +594,7 @@ button {
 
 .avatar-placeholder {
   flex: 1;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
