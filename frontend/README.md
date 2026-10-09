@@ -2,7 +2,7 @@
 
 Interfaz web de **Donna**, un asistente virtual por voz. El usuario graba una pregunta con el micrófono, el frontend la envía al backend (FastAPI) y muestra la conversación, reproduce la respuesta en audio y puede abrir una página web cuando el backend lo solicita.
 
-Este repositorio contiene **solo el frontend**. El backend (FastAPI) es un proyecto independiente.
+Esta carpeta contiene el frontend. El backend (FastAPI) está en la carpeta `backend` del mismo repositorio.
 
 ## Tecnologías
 
@@ -21,14 +21,21 @@ Versiones instaladas al preparar esta documentación: Nuxt 4.6.0, Vue 3.5.43. La
 ```
 app/
 ├── app.vue                      # Interfaz: panel de voz, chat, temas y modo demostración
+├── components/
+│   └── DonnaAvatar.client.vue   # Avatar 3D (Three.js) con sincronización labial
 ├── composables/
 │   ├── useVoiceRecorder.ts      # Grabación con MediaRecorder
 │   └── useDonnaAvatar.ts        # Datos compartidos con el avatar 3D
-└── services/
-    └── donnaApi.ts              # Cliente HTTP de FastAPI y validación de URLs
+├── services/
+│   └── donnaApi.ts              # Cliente HTTP de FastAPI y validación de URLs
+└── utils/
+    └── visemeMouth.ts           # Visemas → expresiones faciales ARKit
 tests/
-└── donnaApi.test.ts             # Pruebas del cliente de la API (node --test)
-public/                          # Recursos estáticos
+├── donnaApi.test.ts             # Pruebas del cliente de la API (node --test)
+└── visemeMouth.test.ts          # Pruebas de la lógica de visemas
+public/
+├── models/facecap.glb           # Modelo 3D del avatar (ejemplo de Three.js)
+└── basis/                       # Decodificador de texturas KTX2 de Three.js
 nuxt.config.ts                   # Configuración de Nuxt y variables públicas
 .env.example                     # Variables de entorno disponibles
 ```
